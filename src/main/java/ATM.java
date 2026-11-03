@@ -48,7 +48,7 @@ public class ATM {
         }
 
         userStore.add(new User(username, password));
-        IO.println("New user account created\n");
+        IO.println("New user account created");
     }
 
     private void login() throws IOException {
