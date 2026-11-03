@@ -23,7 +23,7 @@ public class UtilityStore {
         }
     }
 
-    public static UtilityUser find(String usernameOrNumber) {
+    public UtilityUser find(String usernameOrNumber) {
         for (UtilityUser account : accounts) {
             if (account.getUsername().equals(usernameOrNumber)
                     || account.getAccountNumber().equals(usernameOrNumber)) {
@@ -33,7 +33,7 @@ public class UtilityStore {
         return null;
     }
 
-    public static UtilityUser create(String username, String password) throws IOException {
+    public UtilityUser create(String username, String password) throws IOException {
         String accountNumber;
         do {
             accountNumber = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
@@ -45,7 +45,7 @@ public class UtilityStore {
         return account;
     }
 
-    public static void save() throws IOException {
+    public void save() throws IOException {
         Files.createDirectories(file.getParent());
         mapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), accounts);
     }

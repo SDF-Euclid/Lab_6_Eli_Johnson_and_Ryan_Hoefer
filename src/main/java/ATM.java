@@ -22,7 +22,8 @@ public class ATM {
             IO.println("\nATM options:");
             IO.println("\t1. Create BankUser");
             IO.println("\t2. Login");
-            IO.println("\t3. Quit");
+            IO.println("\t3. Utility company");
+            IO.println("\t4. Quit");
 
             System.out.print("Select an option: ");
             int selection = input.nextInt();
@@ -42,43 +43,18 @@ public class ATM {
     }
 
     private void createUser() throws IOException {
-        IO.println("What account do you want to create?");
-        IO.println("\t1. Create bank user");
-        IO.println("\t2. Utility user");
+        System.out.print("Username: ");
+        String username = input.next();
+        System.out.print("Password: ");
+        String password = input.next();
 
-        System.out.print("Select an option: ");
-        int selection = input.nextInt();
-        IO.println();
-
-        switch (selection) {
-            case 1 -> {
-                System.out.print("Username: ");
-                String username = input.next();
-                System.out.print("Password: ");
-                String password = input.next();
-
-                if (userStore.findByUsername(username) != null) {
-                    IO.println("That username has been taken");
-                    return;
-                }
-                userStore.add(new BankUser(username, password));
-                IO.println("New bank user created");
-            }
-            case 2 -> {
-                System.out.print("Username: ");
-                String username = input.next();
-                System.out.print("Password: ");
-                String password = input.next();
-
-                if (userStore.findByUsername(username) != null) {
-                    IO.println("That username has been taken");
-                    return;
-                }
-                userStore.add(new BankUser(username, password));
-                IO.println("New utility user created");
-            }
-            default -> IO.println("Please select a valid option");
+        if (userStore.findByUsername(username) != null) {
+            IO.println("That username has been taken");
+            return;
         }
+
+        userStore.add(new BankUser(username, password));
+        IO.println("New bank user created");
     }
 
     private void login() throws IOException {
@@ -169,6 +145,7 @@ public class ATM {
             IO.println("\t2. Withdraw");
             IO.println("\t3. Deposit");
             IO.println("\t4. Transfer");
+            IO.println("\t5. Pay utility bill");
 
             System.out.print("Select an option: ");
             int selection = input.nextInt();
@@ -179,6 +156,7 @@ public class ATM {
                 case 2 -> withdraw(checkingAccount);
                 case 3 -> deposit(checkingAccount);
                 case 4 -> transfer(bankUser, checkingAccount);
+                case 5 -> payUtilities(checkingAccount);
                 default -> IO.println("Invalid selection.");
             }
         } else {
