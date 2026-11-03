@@ -31,7 +31,8 @@ public class ATM {
             switch (selection) {
                 case 1 -> createUser();
                 case 2 -> login();
-                case 3 -> {
+                case 3 -> showUtilityCompanyMenu();
+                case 4 -> {
                     IO.println("Bye!");
                     running = false;
                 }
@@ -271,12 +272,12 @@ public class ATM {
         System.out.print("Password: ");
         String password = input.next();
 
-        if (UtilityStore.find(username) != null) {
+        if (utilityStore.find(username) != null) {
             System.out.println("That username has been taken");
             return;
         }
 
-        UtilityUser account = UtilityStore.create(username, password);
+        UtilityUser account = utilityStore.create(username, password);
         System.out.println("Your account number is " + account.getAccountNumber());
     }
 
@@ -286,7 +287,7 @@ public class ATM {
         System.out.print("Password: ");
         String password = input.next();
 
-        UtilityUser user = UtilityStore.find(login);
+        UtilityUser user = utilityStore.find(login);
         if (user == null || !user.getPassword().equals(password)) {
             System.out.println("Invalid login");
             return;
@@ -318,8 +319,7 @@ public class ATM {
             return;
         }
 
-        // Newest first, so the last three paid bills are at the top
-        for (int i = bills.size() - 1; i >= 0; i--) {
+        for (int i = bills.size() - 1; i >= Math.max(0, bills.size() - 3); i--) {
             Bill bill = bills.get(i);
             System.out.println("$" + bill.getAmount() + " due " + bill.getDueDate() + ", paid " + bill.getPaidAt());
         }
@@ -327,7 +327,7 @@ public class ATM {
 
     private void payUtilities(CheckingAccount account) throws IOException {
         System.out.print("Utility account number: ");
-        UtilityUser user = UtilityStore.find(input.next());
+        UtilityUser user = utilityStore.find(input.next());
 
         if (user == null) {
             System.out.println("Utility account not found");

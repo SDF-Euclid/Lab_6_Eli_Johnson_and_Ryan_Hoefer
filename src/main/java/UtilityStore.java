@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class UtilityStore {
-    private static final Path file;
-    private static final ObjectMapper mapper = new ObjectMapper()
+    private final Path file;
+    private final ObjectMapper mapper = new ObjectMapper()
             .findAndRegisterModules()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    private static List<UtilityUser> accounts = new ArrayList<>();
+    private List<UtilityUser> accounts = new ArrayList<>();
 
     public UtilityStore(Path file) throws IOException {
         this.file = file;

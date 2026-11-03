@@ -1,5 +1,6 @@
 package accounts;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ public class BankUser {
 
     private String username;
     private String password;
-    private int utilityNumber;
+    @JsonManagedReference
     private ArrayList<AbstractAccount> accounts = new ArrayList<>();
 
     public BankUser(String username, String password) {
