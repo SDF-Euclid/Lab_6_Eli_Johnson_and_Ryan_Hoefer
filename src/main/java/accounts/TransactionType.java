@@ -1,5 +1,5 @@
 package accounts;
 
 public enum TransactionType {
-    DEPOSIT, WITHDRAW, TRANSFER
+    DEPOSIT, WITHDRAW, TRANSFER, UTILITY_PAYMENT
 }

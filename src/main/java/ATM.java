@@ -6,9 +6,13 @@ import java.util.Scanner;
 public class ATM {
 
     private final UserStore userStore;
+    private final UtilityStore utilityStore;
     private final Scanner input = new Scanner(System.in);
 
-    public ATM(UserStore userStore) {this.userStore = userStore;}
+    public ATM(UserStore userStore, UtilityStore utilityStore) {
+        this.userStore = userStore;
+        this.utilityStore = utilityStore;
+    }
 
     public void run() throws IOException {
         IO.println("This ATM belongs to Ryan and Eli Banking®");
@@ -318,6 +322,25 @@ public class ATM {
         for (int i = bills.size() - 1; i >= 0; i--) {
             Bill bill = bills.get(i);
             System.out.println("$" + bill.getAmount() + " due " + bill.getDueDate() + ", paid " + bill.getPaidAt());
+        }
+    }
+
+    private void payUtilities(CheckingAccount account) throws IOException {
+        System.out.print("Utility account number: ");
+        UtilityUser user = UtilityStore.find(input.next());
+
+        if (user == null) {
+            System.out.println("Utility account not found");
+            return;
+        }
+
+        try {
+            account.payUtilities(user);
+            userStore.save();
+            utilityStore.save();
+            System.out.println("Bill paid");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

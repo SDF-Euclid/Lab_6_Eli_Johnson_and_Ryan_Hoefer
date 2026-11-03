@@ -43,7 +43,12 @@ public class CheckingAccount extends AbstractAccount{
         System.out.print("successfully transferred $" + amount + " from this account into your savings account.");
     }
 
-    public void payUtilities() {
+    public void payUtilities(UtilityUser user) {
+        long amount = user.getNextBill().getAmount();
+        if (balance < amount) throw new IllegalArgumentException("Insufficient funds to pay this bill.");
 
+        balance -= amount;
+        user.payNextBill();
+        transactions.add(new Transaction(accountType, TransactionType.UTILITY_PAYMENT, -1 * amount));
     }
 }
