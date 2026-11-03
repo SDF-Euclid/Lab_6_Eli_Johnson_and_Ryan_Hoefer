@@ -9,7 +9,7 @@ public class SavingsAccount extends AbstractAccount {
 
     private static final int DAILY_TRANSFER_AMOUNT = 100;
 
-    public SavingsAccount(User accountOwner, AccountType accountType) {super(accountOwner, accountType);}
+    public SavingsAccount(BankUser accountOwner, AccountType accountType) {super(accountOwner, accountType);}
 
     public void transfer(long amount, AccountType transferAccountType) {
         if (transferAccountType == this.accountType) throw new IllegalArgumentException("Transfer must be from one unique account to another.");
@@ -25,7 +25,7 @@ public class SavingsAccount extends AbstractAccount {
             }
         }
 
-        if (transferAccount == null) throw new IllegalArgumentException("User does not have an account of type " + transferAccountType);
+        if (transferAccount == null) throw new IllegalArgumentException("BankUser does not have an account of type " + transferAccountType);
 
         transferAccount.deposit(amount);
         transferAccount.transactions.add(new Transaction(accountType, TransactionType.TRANSFER, amount));

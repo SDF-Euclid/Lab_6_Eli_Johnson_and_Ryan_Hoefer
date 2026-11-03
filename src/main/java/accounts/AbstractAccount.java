@@ -21,13 +21,13 @@ import java.util.ArrayList;
 public abstract class AbstractAccount {
 
     @JsonBackReference
-    protected User accountOwner;
+    protected BankUser accountOwner;
     protected static final long DAILY_DEPOSIT_AMOUNT = 5000;
     protected ArrayList<Transaction> transactions = new ArrayList<>();
     protected AccountType accountType;
     protected long balance;
 
-    public AbstractAccount(User accountOwner, AccountType accountType) {
+    public AbstractAccount(BankUser accountOwner, AccountType accountType) {
         for (AbstractAccount account: accountOwner.getAccounts()) {
             if (account.getAccountType() == accountType) throw new IllegalArgumentException("The owner already has an account of type " + account.getAccountType());
         }

@@ -9,7 +9,7 @@ public class CheckingAccount extends AbstractAccount{
 
     private static final long DAILY_WITHDRAW_AMOUNT = 500;
 
-    public CheckingAccount(User accountOwner, AccountType accountType) {super(accountOwner, accountType);}
+    public CheckingAccount(BankUser accountOwner, AccountType accountType) {super(accountOwner, accountType);}
 
     public void withdraw(long amount) {
         if (balance < amount) throw new IllegalArgumentException("Cannot withdraw more than $" + balance + " from this account.");
@@ -34,7 +34,7 @@ public class CheckingAccount extends AbstractAccount{
             }
         }
 
-        if (transferAccount == null) throw new IllegalArgumentException("User does not have an account of type " + transferAccountType);
+        if (transferAccount == null) throw new IllegalArgumentException("BankUser does not have an account of type " + transferAccountType);
 
         transferAccount.deposit(amount);
         transferAccount.transactions.add(new Transaction(accountType, TransactionType.TRANSFER, amount));
