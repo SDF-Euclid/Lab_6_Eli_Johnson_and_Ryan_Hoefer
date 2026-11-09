@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
-// This class was mostly gnerated by chatgpt but heavily changed by me(Ryan)
+// This class was mostly gen rated by chatgpt but heavily changed by me(Ryan), also had it re write to include one assertion per test
 
 public class UtilityTest {
     @Rule
@@ -29,51 +29,133 @@ public class UtilityTest {
     }
 
     @Test
-    public void createsUtilityAccountWithSixDigitNumberAndFirstBill() {
+    public void assignsSixDigitAccountNumber() {
         assertTrue(utility.getAccountNumber().matches("[1-9][0-9]{5}"));
+    }
+
+    @Test
+    public void startsWithEmptyPaymentHistory() {
         assertTrue(utility.getPaidBills().isEmpty());
+    }
+
+    @Test
+    public void setsFirstBillAmount() {
         assertEquals(100, utility.getNextBill().getAmount());
+    }
+
+    @Test
+    public void setsFirstBillDueDate() {
         assertNotNull(utility.getNextBill().getDueDate());
     }
 
     @Test
-    public void findsUtilityAccountByUsernameOrAccountNumber() {
+    public void findsUtilityAccountByUsername() {
         assertSame(utility, store.find("testUtility"));
+    }
+
+    @Test
+    public void findsUtilityAccountByAccountNumber() {
         assertSame(utility, store.find(utility.getAccountNumber()));
+    }
+
+    @Test
+    public void returnsNullForUnknownUsername() {
         assertNull(store.find("unknown-user"));
     }
 
     @Test
-    public void paymentMovesBillToHistoryAndCreatesNextBill() {
-        Bill firstBill = utility.getNextBill();
-
+    public void recordsOnePayment() {
         utility.payNextBill();
 
         assertEquals(1, utility.getPaidBills().size());
-        assertSame(firstBill, utility.getPaidBills().get(0));
-        assertNotNull(firstBill.getPaidAt());
-
-        Bill nextBill = utility.getNextBill();
-        assertEquals(100, nextBill.getAmount());
-        assertEquals(firstBill.getDueDate().plusMonths(1), nextBill.getDueDate());
-        assertNull(nextBill.getPaidAt());
     }
 
     @Test
-    public void savesPaymentHistoryAndNextBill() throws IOException {
+    public void movesOriginalBillToHistory() {
+        Bill firstBill = utility.getNextBill();
+        utility.payNextBill();
+
+        assertSame(firstBill, utility.getPaidBills().get(0));
+    }
+
+    @Test
+    public void marksOriginalBillPaid() {
+        Bill firstBill = utility.getNextBill();
+        utility.payNextBill();
+
+        assertNotNull(firstBill.getPaidAt());
+    }
+
+    @Test
+    public void advancesNextBillDueDate() {
+        Bill firstBill = utility.getNextBill();
+        utility.payNextBill();
+
+        assertEquals(firstBill.getDueDate().plusMonths(1), utility.getNextBill().getDueDate());
+    }
+
+    @Test
+    public void setsNextBillAmountAfterPayment() {
+        utility.payNextBill();
+
+        assertEquals(100, utility.getNextBill().getAmount());
+    }
+
+    @Test
+    public void leavesNextBillUnpaid() {
+        utility.payNextBill();
+
+        assertNull(utility.getNextBill().getPaidAt());
+    }
+
+    @Test
+    public void reloadsAccountAfterPayments() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertNotNull(saved);
+    }
+
+    @Test
+    public void reloadsAccountUsername() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertEquals("testUtility", saved.getUsername());
+    }
+
+    @Test
+    public void reloadsBothPaidBills() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertEquals(2, saved.getPaidBills().size());
+    }
+
+    @Test
+    public void reloadsFirstPaymentTimestamp() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertNotNull(saved.getPaidBills().get(0).getPaidAt());
+    }
+
+    @Test
+    public void reloadsSecondPaymentTimestamp() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertNotNull(saved.getPaidBills().get(1).getPaidAt());
+    }
+
+    @Test
+    public void reloadsNextBillDueDate() throws IOException {
+        UtilityUser saved = saveAndReloadAfterTwoPayments();
+
+        assertEquals(utility.getNextBill().getDueDate(), saved.getNextBill().getDueDate());
+    }
+
+    private UtilityUser saveAndReloadAfterTwoPayments() throws IOException {
         utility.payNextBill();
         utility.payNextBill();
         store.save();
 
-        UtilityStore reopened = new UtilityStore(utilityFile);
-        UtilityUser saved = reopened.find(utility.getAccountNumber());
-
-        assertNotNull(saved);
-        assertEquals("testUtility", saved.getUsername());
-        assertEquals(2, saved.getPaidBills().size());
-        assertNotNull(saved.getPaidBills().get(0).getPaidAt());
-        assertNotNull(saved.getPaidBills().get(1).getPaidAt());
-        assertEquals(utility.getNextBill().getDueDate(), saved.getNextBill().getDueDate());
+        return new UtilityStore(utilityFile).find(utility.getAccountNumber());
     }
 
     // Storage tests below were generated with ChatGPT.
@@ -119,7 +201,14 @@ public class UtilityTest {
         UtilityStore reopened = new UtilityStore(utilityFile);
 
         assertNull(reopened.find(utility.getUsername()));
+    }
+
+    @Test
+    public void canSaveAccountAfterLoadingEmptyList() throws IOException {
+        Files.writeString(utilityFile, "[]");
+        UtilityStore reopened = new UtilityStore(utilityFile);
         UtilityUser created = reopened.create("new-user", "password");
+
         assertEquals(created.getAccountNumber(),
                 new UtilityStore(utilityFile).find("new-user").getAccountNumber());
     }
@@ -132,13 +221,26 @@ public class UtilityTest {
     }
 
     @Test
-    public void reloadsMultipleAccounts() throws IOException {
+    public void assignsDistinctAccountNumbers() throws IOException {
+        UtilityUser second = store.create("second-user", "second-password");
+
+        assertNotEquals(utility.getAccountNumber(), second.getAccountNumber());
+    }
+
+    @Test
+    public void reloadsFirstOfMultipleAccounts() throws IOException {
+        store.create("second-user", "second-password");
+        UtilityStore reopened = new UtilityStore(utilityFile);
+
+        assertEquals(utility.getAccountNumber(),
+                reopened.find(utility.getUsername()).getAccountNumber());
+    }
+
+    @Test
+    public void reloadsSecondOfMultipleAccounts() throws IOException {
         UtilityUser second = store.create("second-user", "second-password");
         UtilityStore reopened = new UtilityStore(utilityFile);
 
-        assertNotEquals(utility.getAccountNumber(), second.getAccountNumber());
-        assertEquals(utility.getAccountNumber(),
-                reopened.find(utility.getUsername()).getAccountNumber());
         assertEquals(second.getUsername(),
                 reopened.find(second.getAccountNumber()).getUsername());
     }
