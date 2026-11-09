@@ -18,8 +18,27 @@ public class UtilityStore {
 
     public UtilityStore(Path file) throws IOException {
         this.file = file;
+
         if (Files.exists(file)) {
-            accounts = mapper.readValue(file.toFile(), new TypeReference<List<UtilityUser>>() {});
+            List<UtilityUser> loadedAccounts =
+                    mapper.readValue(file.toFile(), new TypeReference<List<UtilityUser>>() {});
+
+            if (loadedAccounts == null) {
+                throw new IOException("Utility storage must contain an account list.");
+            }
+
+            for (int i = 0; i < loadedAccounts.size(); i++) {
+                UtilityUser account = loadedAccounts.get(i);
+                if (account == null
+                        || account.getUsername() == null
+                        || account.getPassword() == null
+                        || account.getAccountNumber() == null
+                        || account.getNextBill() == null) {
+                    throw new IOException("Invalid utility account at index " + i + ".");
+                }
+            }
+
+            accounts = loadedAccounts;
         }
     }
 
